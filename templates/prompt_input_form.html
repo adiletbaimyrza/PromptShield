@@ -10,8 +10,15 @@
         <br>
         <button type="submit">Submit</button>
     </form>
+
+    {% if original_text %}
+      <h2>Original text:</h2>
+      <p>{{ original_text }}</p>
+    {% endif %}
+
     {% if anonimized_text %}
-      <p>Your anonimized prompt: {{ anonimized_text }}</p>
+      <h2>Anonimized text:</h2>
+      <p>{{ anonimized_text }}</p>
     {% endif %}
   </body>
 </html>
