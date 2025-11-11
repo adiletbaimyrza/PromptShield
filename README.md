@@ -1,5 +1,5 @@
-![alt text](image-2.png)
-![alt text](image-3.png)
+![alt text](blob/cicd.png)
+![alt text](blob/architecture.png)
 
 activate your virtual environment from root
 
