@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+  <head>
+    <title>PromptShield</title>
+  </head>
+  <body>
+    <h1>Enter your prompt</h1>
+    <form method="POST">
+        <textarea name="user_text" placeholder="Type here..." required rows="5" cols="40"></textarea>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+    {% if anonimized_text %}
+      <p>Your anonimized prompt: {{ anonimized_text }}</p>
+    {% endif %}
+  </body>
+</html>
