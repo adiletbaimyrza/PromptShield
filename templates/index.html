@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromptShield</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ PromptShield</h1>
+            <p class="subtitle">Protect Sensitive Information in Your Prompts</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2>Enter Your Prompt</h2>
+                <form id="anonymizeForm">
+                    <textarea 
+                        id="userText" 
+                        placeholder="Type or paste your prompt here... Your sensitive information will be anonymized." 
+                        required 
+                        rows="8"
+                    ></textarea>
+                    <button type="submit" class="btn btn-primary">Anonymize</button>
+                </form>
+            </section>
+
+            <section id="resultSection" class="result-section" style="display: none;">
+                <h2>Anonymized Prompt</h2>
+                <div class="result-container">
+                    <div class="result-item">
+                        <h3>Original Text</h3>
+                        <div id="originalText" class="text-box original-text"></div>
+                    </div>
+                    <div class="result-item">
+                        <h3>Anonymized Text</h3>
+                        <div id="anonymizedText" class="text-box anonymized-text"></div>
+                        <button class="btn btn-secondary" onclick="copyToClipboard()">Copy</button>
+                    </div>
+                    <div class="result-item">
+                        <h3>Entities Found</h3>
+                        <div id="entityCount" class="stat-box"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="errorSection" class="error-section" style="display: none;">
+                <p id="errorMessage" class="error-message"></p>
+            </section>
+
+            <section id="loadingSection" class="loading-section" style="display: none;">
+                <div class="spinner"></div>
+                <p>Processing...</p>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 PromptShield.</p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
