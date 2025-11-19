@@ -1,0 +1,13 @@
+{
+  "name": "pshield",
+  "version": "0.0.1",
+  "description": "A library to protect your prompts.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adiletbaimyrza/promptshield.git"
+  },
+  "license": "MIT Licence",
+  "author": "Adilet Baimyrza",
+  "type": "module",
+  "main": "index.js"
+}
