@@ -93,7 +93,7 @@ class TextAnonymizer:
     def _extract_amounts(self, text: str) -> Set[Tuple[str, int, int]]:
         amount_patterns = [
             r'\$\s?\d+(?:,\d{3})*(?:\.\d{2})?',
-            r'\d+(?:,\d{3})*(?:\.\d{2})?\s?(?:USD|EUR|GBP|dollars?|euro?|pounds?)',
+            r'\d+(?:,\d{3})*(?:\.\d{2})?\s?(?:USD|EUR|GBP|dollars?|euros?|pounds?)',
             r'(?:USD|EUR|GBP)\s?\d+(?:,\d{3})*(?:\.\d{2})?'
         ]
         matches = set()
@@ -103,6 +103,10 @@ class TextAnonymizer:
         return matches
     #
     # Todo: extract_addresses
+    def _extract_addresses(self, text: str) -> Set[Tuple[str, int, int]]:
+        pass
+    #
+    # Todo: improve name extraction logic. Currently: "John paid him $20. Then Jane paid him $5" would think that Then Jane is a person
     #
     def _extract_names(self, text: str) -> Set[Tuple[str, int, int]]:
         doc = self.nlp(text)
