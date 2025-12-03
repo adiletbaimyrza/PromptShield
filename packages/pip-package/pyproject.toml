@@ -11,6 +11,11 @@ authors = [
 description = "A library to protect your prompts."
 readme = "README.md"
 requires-python = ">=3.9"
+dependencies = [
+    "spacy>=3.7.0",
+    "langdetect>=1.0.9",
+    "deep-translator>=1.11.4",
+]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
