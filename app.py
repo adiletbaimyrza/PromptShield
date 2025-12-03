@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template
-from services.anonimize import anonimizacja
+from services.anonymize import anonymize
 from pshield import PromptShield
 
 pshield = PromptShield(config={})
@@ -12,7 +12,7 @@ def index():
     anonimized_text = "" 
     if request.method == 'POST':
         original_text = request.form.get('user_text', '')
-        anonimized_text = anonimizacja(original_text)
+        anonimized_text = anonymize(original_text)
         anonimized_text = pshield.protect(anonimized_text)
     return render_template(
         "prompt_input_form.html",
