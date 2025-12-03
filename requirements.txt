@@ -1,6 +1,7 @@
 blinker==1.9.0
 click==8.3.0
 Flask==3.1.2
+Flask-CORS==5.0.0
 gunicorn==23.0.0
 itsdangerous==2.2.0
 Jinja2==3.1.6
@@ -10,3 +11,4 @@ pshield==0.0.2
 Werkzeug==3.1.3
 langdetect==1.0.9
 deep-translator==1.11.4
+spacy>=3.7.0
