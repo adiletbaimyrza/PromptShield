@@ -1,7 +1,7 @@
 import sys
 import argparse
 from pathlib import Path
-from anonymizer import TextAnonymizer
+from pshield import PromptShield
 
 def main():
 
@@ -39,7 +39,7 @@ def main():
     )
 
     args = parser.parse_args()
-    anonymizer = TextAnonymizer(mapping_file=args.mapping_file)
+    anonymizer = PromptShield(mapping_file=args.mapping_file)
 
     #Todo: Logic and implementation, for now this does nothing.
 
