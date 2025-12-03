@@ -1,0 +1,10 @@
+{
+  "manifest_version": 2,
+  "name": "PromptShield Anonymizer",
+  "version": "1.0",
+  "description": "Anonymize your prompts",
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": []
+}
