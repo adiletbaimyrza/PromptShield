@@ -21,7 +21,7 @@ murmurhash==1.0.15
 numpy==2.3.5
 packaging==25.0
 preshed==3.0.12
-pshield==0.0.4
+pshield==0.0.5
 pydantic==2.12.5
 pydantic_core==2.41.5
 requests==2.32.5
