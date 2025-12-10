@@ -1,20 +1,26 @@
-1. packages ktore musza byc to: flask flask-cors langdetect deep-translator
+## Installation
 
-pip install flask flask-cors langdetect deep-translator
+```bash
+# Install all dependencies from root
+pip install -r ../requirements.txt
+```
 
-2. start backend
+## Start Backend
+
+```bash
 
 python extension_server.py
+```
 
-3. 
+## Load Extension 
 
 Chromium:
    - chrome://extensions/
-   - Wlaczyc dev mode
+   - Enter dev mode
    - Load unpackaged
-   - Wybierz `extension` folder
+   - Choose `extension` folder
 
 Firefox:
    - about:debugging#/runtime/this-firefox
    - "Load Temporary Add-on"
-   - Kliknij na  `manifest.json` w folderze `extension` 
+   - Choose `manifest.json` in `extension` 
