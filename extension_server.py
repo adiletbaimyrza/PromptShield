@@ -11,7 +11,7 @@ anonymizer = PromptShield()
 def anonymize():
     data = request.json
     text = data.get('text', '')
-    result = anonymizer.anonymize(text)
+    result = anonymizer.protect(text)
     return jsonify({'result': result})
 
 if __name__ == '__main__':
