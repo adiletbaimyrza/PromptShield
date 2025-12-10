@@ -1,1 +1,1 @@
-pshield>=0.0.2
+pshield>=0.0.4
