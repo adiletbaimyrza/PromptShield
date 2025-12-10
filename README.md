@@ -77,6 +77,8 @@ python3 cli.py -t "Test data" --mapping-file custom_mappings.json
 
 ```bash
 # From root directory
+python3 -m spacy download en_core_web_sm
+# and then
 flask --app app run
 ```
 
