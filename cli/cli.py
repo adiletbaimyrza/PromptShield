@@ -27,19 +27,13 @@ def main():
         help='Text input'
     )
     parser.add_argument(
-        '--mapping-file',
-        type=str,
-        default='.anonymizer_mappings.json',
-        help='Custom mapping file location (default: .anonymizer_mappings.json)'
-    )
-    parser.add_argument(
         '-o', '--output',
         type=str,
         help='Output file (default: stdout)'
     )
 
     args = parser.parse_args()
-    anonymizer = PromptShield(mapping_file=args.mapping_file)
+    anonymizer = PromptShield()
 
     #Todo: Logic and implementation, for now this does nothing.
 
@@ -63,7 +57,7 @@ def main():
         return 1
 
     try:
-        anonymized_text = anonymizer.anonymize(text)
+        anonymized_text = anonymizer.protect(text)
     except RuntimeError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
