@@ -9,5 +9,19 @@
   "license": "MIT Licence",
   "author": "Adilet Baimyrza",
   "type": "module",
-  "main": "index.js"
+  "main": "index.js",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "dependencies": {
+    "@vitalets/google-translate-api": "^9.2.1",
+    "compromise": "^14.14.4",
+    "franc": "^6.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "babel-jest": "^30.0.0",
+    "jest": "^30.2.0"
+  }
 }
