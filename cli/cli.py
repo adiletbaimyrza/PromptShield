@@ -3,47 +3,51 @@ import argparse
 from pathlib import Path
 from pshield import PromptShield
 
-def main():
+LOGO = r"""
+╔═══════════════════════════════════════════╗
+║  ____  ____  _   _ ___ _____ _     ____   ║
+║ |  _ \/ ___|| | | |_ _| ____| |   |  _ \  ║
+║ | |_) \___ \| |_| || ||  _| | |   | | | | ║
+║ |  __/ ___) |  _  || || |___| |___| |_| | ║
+║ |_|   |____/|_| |_|___|_____|_____|____/  ║
+║                                           ║
+║  Protect sensitive data in your prompts   ║
+╚═══════════════════════════════════════════╝
+"""
 
+def main():
     parser = argparse.ArgumentParser(
         description='Anonymize sensitive information in text prompts/documents',
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='''
-    Examples:
-      python cli.py -f document.txt
-      python cli.py -t "John sent $1,000 to Jane"
-            '''
+        epilog='Examples:\n  pshield -f document.txt\n  pshield -t "John sent $1,000 to Jane"'
     )
 
     input_group = parser.add_mutually_exclusive_group()
-    input_group.add_argument(
-        '-f', '--file',
-        type=str,
-        help='Enter filename as input'
-    )
-    input_group.add_argument(
-        '-t', '--text',
-        type=str,
-        help='Text input'
-    )
-    parser.add_argument(
-        '-o', '--output',
-        type=str,
-        help='Output file (default: stdout)'
-    )
+    input_group.add_argument('-f', '--file', help='Input file path')
+    input_group.add_argument('-t', '--text', help='Input text string')
+    parser.add_argument('-o', '--output', help='Output file (default: stdout)')
+    parser.add_argument('--no-logo', action='store_true', help='Suppress logo display')
 
     args = parser.parse_args()
-    anonymizer = PromptShield()
 
-    #Todo: Logic and implementation, for now this does nothing.
+    if not args.no_logo and sys.stdout.isatty():
+        print(LOGO)
+
+    try:
+        anonymizer = PromptShield()
+    except OSError as e:
+        if "Can't find model 'en_core_web_sm'" in str(e):
+            print("Error: spaCy model not found. Install it with:", file=sys.stderr)
+            print(" python -m spacy download en_core_web_sm", file=sys.stderr)
+            return 1
+        raise
 
     if args.file:
         file_path = Path(args.file)
         if not file_path.exists():
             print(f"Error: File '{args.file}' not found.", file=sys.stderr)
             return 1
-        with open(file_path, 'r', encoding='utf-8') as f:
-            text = f.read()
+        text = file_path.read_text(encoding='utf-8')
     elif args.text:
         text = args.text
     else:
@@ -53,23 +57,18 @@ def main():
         text = sys.stdin.read()
 
     if not text.strip():
-        print("Error: No input text provided.", file=sys.stderr)
+        print("Error: No input provided.", file=sys.stderr)
         return 1
 
     try:
         anonymized_text = anonymizer.protect(text)
-    except RuntimeError as e:
-        print(f"Error: {e}", file=sys.stderr)
-        return 1
     except Exception as e:
-        print(f"Unexpected error: {e}", file=sys.stderr)
+        print(f"Error: {e}", file=sys.stderr)
         return 1
 
     if args.output:
-        output_path = Path(args.output)
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(anonymized_text)
-        print(f"Anonymized text written to '{args.output}'", file=sys.stderr)
+        Path(args.output).write_text(anonymized_text, encoding='utf-8')
+        print(f"✓ Anonymized text written to '{args.output}'", file=sys.stderr)
     else:
         print(anonymized_text)
 
