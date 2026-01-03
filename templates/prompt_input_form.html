@@ -1,24 +1,391 @@
-<!doctype html>
-<html>
-  <head>
-    <title>PromptShield</title>
-  </head>
-  <body>
-    <h1>Enter your prompt</h1>
-    <form method="POST">
-        <textarea name="user_text" placeholder="Type here..." required rows="5" cols="40"></textarea>
-        <br>
-        <button type="submit">Submit</button>
-    </form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromptShield - Protect Your Sensitive Data</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    {% if original_text %}
-      <h2>Original text:</h2>
-      <p>{{ original_text }}</p>
-    {% endif %}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+            min-height: 100vh;
+        }
 
-    {% if anonimized_text %}
-      <h2>Anonimized text:</h2>
-      <p>{{ anonimized_text }}</p>
-    {% endif %}
-  </body>
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Form Section - At Top */
+        .demo {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 60px;
+        }
+
+        .demo h2 {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: #222;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+            font-size: 0.95rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+            background: #fff;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        .submit-btn {
+            background: #222;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .submit-btn:hover {
+            background: #333;
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .result-box {
+            margin-bottom: 25px;
+        }
+
+        .result-box:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-box h3 {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: #666;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-text {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #222;
+            border: 1px solid #eee;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 40px 0;
+            margin-bottom: 50px;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #222;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Features Section */
+        .features {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 50px;
+        }
+
+        .features h2 {
+            font-size: 1.8rem;
+            margin-bottom: 35px;
+            color: #222;
+            font-weight: 600;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            padding: 20px 0;
+        }
+
+        .feature-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #222;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 50px;
+        }
+
+        .how-it-works h2 {
+            font-size: 1.8rem;
+            margin-bottom: 35px;
+            color: #222;
+            font-weight: 600;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 30px;
+        }
+
+        .step {
+            padding: 20px 0;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: #222;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .step h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #222;
+            font-weight: 600;
+        }
+
+        .step p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            border-top: 1px solid #eee;
+            margin-top: 60px;
+        }
+
+        .footer a {
+            color: #222;
+            text-decoration: none;
+            margin: 0 15px;
+            transition: opacity 0.2s ease;
+        }
+
+        .footer a:hover {
+            opacity: 0.7;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .demo {
+                padding: 25px;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .features,
+            .how-it-works {
+                padding: 35px 25px;
+            }
+
+            .features h2,
+            .how-it-works h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Form Section - At Top -->
+        <div class="demo">
+            <h2>Protect Your Text</h2>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="user_text">Enter text with sensitive information:</label>
+                    <textarea 
+                        id="user_text" 
+                        name="user_text" 
+                        placeholder="Example: John Smith sent $50 to jane@example.com and called +1-555-123-4567" 
+                        required 
+                        rows="6"
+                    >{% if original_text %}{{ original_text }}{% endif %}</textarea>
+                </div>
+                <button type="submit" class="submit-btn">Protect</button>
+            </form>
+
+            {% if original_text or anonimized_text %}
+            <div class="result-section">
+                {% if original_text %}
+                <div class="result-box">
+                    <h3>Original</h3>
+                    <div class="result-text">{{ original_text }}</div>
+                </div>
+                {% endif %}
+
+                {% if anonimized_text %}
+                <div class="result-box">
+                    <h3>Protected</h3>
+                    <div class="result-text">{{ anonimized_text }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>PromptShield</h1>
+            <p>Automatically detect and replace sensitive information in your text with secure placeholders</p>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features">
+            <h2>Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>20+ Entity Types</h3>
+                    <p>Detects emails, phones, credit cards, names, locations, JWT tokens, and more</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Multi-language</h3>
+                    <p>Automatically detects language and translates placeholders to match</p>
+                </div>
+                <div class="feature-card">
+                    <h3>NLP-Powered</h3>
+                    <p>Uses advanced NLP for accurate name and location detection</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Multiple Interfaces</h3>
+                    <p>Available as Python package, JavaScript package, CLI tool, and browser extension</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="how-it-works">
+            <h2>How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Detect</h3>
+                    <p>Scans your text for sensitive information using regex patterns and NLP</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Replace</h3>
+                    <p>Replaces detected entities with consistent placeholders like [EMAIL_1], [NAME_1]</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Translate</h3>
+                    <p>Automatically translates placeholders to match your text's language</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Protect</h3>
+                    <p>Your sensitive data is now safely anonymized and ready to use</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                <a href="https://github.com/adiletbaimyrza/promptshield" target="_blank">GitHub</a> |
+                <a href="https://pypi.org/project/pshield/" target="_blank">PyPI</a> |
+                <a href="https://www.npmjs.com/package/pshield" target="_blank">npm</a>
+            </p>
+            <p style="margin-top: 15px; font-size: 0.9rem;">© 2024 PromptShield. MIT License.</p>
+        </div>
+    </div>
+</body>
 </html>
