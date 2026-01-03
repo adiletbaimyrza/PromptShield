@@ -1,6 +1,6 @@
 {
   "name": "pshield",
-  "version": "0.0.3",
+  "version": "0.0.7",
   "description": "A library to protect your prompts.",
   "repository": {
     "type": "git",
