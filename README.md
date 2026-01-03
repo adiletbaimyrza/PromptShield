@@ -1,108 +1,128 @@
 # PromptShield
 
-Anonymize sensitive information in text prompts and documents using multiple interfaces: CLI, Web App, or Browser Extension.
+A comprehensive solution for protecting sensitive information in text prompts. Automatically detects and replaces personal data, financial information, and other sensitive entities with placeholders across multiple platforms and interfaces.
 
-![alt text](blob/cicd.png)
-![alt text](blob/architecture.png)
+![Architecture](blob/architecture.png)
+![CI/CD](blob/cicd.png)
 
 ## Features
 
-- **NLP-based anonymization** using spaCy for accurate name detection
-- **Regex-based detection** for emails, phone numbers, and monetary amounts
-- **Persistent mappings** to maintain consistency across documents
-- **Multiple interfaces**: CLI, Web App, Browser Extension
-- **Centralized logic** in pip package for easy reuse
+- 🔒 **20+ Entity Types**: Detects emails, phones, credit cards, names, locations, JWT tokens, crypto addresses, and more
+- 🌍 **Multi-language Support**: Automatically detects language and translates placeholders
+- 🎯 **NLP-based Detection**: Uses spaCy (Python) and compromise (JavaScript) for accurate name/location detection
+- 🔄 **Consistent Placeholders**: Same entity values receive the same placeholder across documents
+- 🚀 **Multiple Interfaces**: Use via CLI, Web App, Browser Extension, or as a library
 
 ## Project Structure
 
 ```
 PromptShield/
-├── packages/pip-package/    # Core anonymization package
-│   └── src/pshield/
-│       └── pshield.py       # PromptShield class (all functionality)
-├── cli/                     # CLI application
-│   ├── cli.py
-│   └── requirements.txt
-├── app.py                   # Web application
-├── extension_server.py      # Browser extension API
-└── extension/               # Browser extension
+├── packages/
+│   ├── pip-package/      # Python package (PyPI: pshield)
+│   └── npm-package/      # JavaScript/Node.js package (npm: pshield)
+├── cli/                  # Command-line interface
+├── extension/            # Browser extension (Chrome/Firefox)
+├── app.py                # Web application (Flask)
+└── extension_server.py   # Extension backend server
 ```
 
-## Setup
+## Quick Start
 
-### 1. Install the pshield package
+### Python Package
 
 ```bash
-# Install in editable mode from root
-pip install -e packages/pip-package
-
-# Download spaCy language model
-python3 -m spacy download en_core_web_sm
+pip install pshield
+python -m spacy download en_core_web_sm
 ```
 
-### 2. Install interface-specific dependencies
+```python
+from pshield import PromptShield
+shield = PromptShield()
+result = shield.protect("John sent $50 to jane@example.com")
+# Output: "[NAME_1] sent [AMOUNT_1] to [EMAIL_1]"
+```
 
-**For Web App:**
+📖 **[Python Package Documentation](packages/pip-package/README.md)**
+
+### JavaScript/Node.js Package
+
 ```bash
-pip install -r requirements.txt
+npm install pshield
 ```
 
-**For CLI:**
-```bash
-cd cli
-pip install -r requirements.txt
+```javascript
+import PromptShield from 'pshield';
+const shield = new PromptShield();
+const result = await shield.protect("John sent $50 to jane@example.com");
+// Output: "[NAME_1] sent [AMOUNT_1] to [EMAIL_1]"
 ```
 
-## Usage
+📖 **[JavaScript Package Documentation](packages/npm-package/README.md)**
 
 ### CLI Tool
 
 ```bash
-cd cli
-
-# Anonymize text directly
-python3 cli.py -t "John Smith sent $50 to jane@example.com"
-
-# Anonymize from file
-python3 cli.py -f example.txt
-
-# Save output to file
-python3 cli.py -f document.txt -o anonymized.txt
-
-# Use custom mapping file
-python3 cli.py -t "Test data" --mapping-file custom_mappings.json
+pip install -e cli/
+pshield -t "John sent $50 to jane@example.com"
+pshield -f document.txt -o protected.txt
 ```
+
+📖 **[CLI Documentation](cli/README.md)**
 
 ### Web Application
 
 ```bash
-# From root directory
-python3 -m spacy download en_core_web_sm
-# and then
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
 flask --app app run
 ```
 
-Then navigate to `http://localhost:5000`
+Visit `http://localhost:5000`
 
-### Browser Extension Server
+### Browser Extension
 
-```bash
-# From root directory
-python3 extension_server.py
-```
+1. Start the backend server:
+   ```bash
+   python extension_server.py
+   ```
 
-The extension will connect to `http://localhost:5000/anonymize`
+2. Load the extension in your browser (see extension docs)
 
-### Using as a Python Package
+📖 **[Extension Documentation](extension/How2Use.md)**
 
-```python
-from pshield import PromptShield
+## Supported Entities
 
-shield = PromptShield()
-result = shield.anonymize("John Smith sent $50 to jane@example.com")
-print(result)  # "name1 sent amt to email1"
-```
+**Personal**: Names, emails, phones, usernames  
+**Financial**: Credit cards, CVV, expiry dates, monetary amounts  
+**Location**: Places, GPS coordinates, IP addresses  
+**Digital**: URLs, JWT tokens, Bitcoin/Ethereum addresses  
+**Other**: Dates, memory sizes, alphanumeric codes
+
+## Documentation
+
+- 📦 **[Python Package](packages/pip-package/README.md)** - Install from PyPI, usage examples, API reference
+- 📦 **[JavaScript Package](packages/npm-package/README.md)** - Install from npm, async API, usage examples
+- 💻 **[CLI Tool](cli/README.md)** - Command-line interface documentation
+- 🌐 **[Browser Extension](extension/How2Use.md)** - Installation and usage guide
+- 🔧 **[Python Package Setup](packages/pip-package/SETUP.md)** - Development setup and publishing guide
+- 🔧 **[JavaScript Package Setup](packages/npm-package/SETUP.md)** - Development setup and publishing guide
 
 ## Demo
 
-https://promptshield-wq0g.onrender.com/
+Live demo: https://promptshield-wq0g.onrender.com/
+
+## Requirements
+
+**Python Package**: Python 3.9+, spaCy >= 3.7.0, langdetect >= 1.0.9, deep-translator >= 1.11.4  
+**JavaScript Package**: Node.js 14+, ES modules support
+
+## License
+
+MIT License
+
+## Links
+
+- **GitHub**: https://github.com/adiletbaimyrza/promptshield
+- **PyPI**: https://pypi.org/project/pshield/
+- **npm**: https://www.npmjs.com/package/pshield
+- **Issues**: https://github.com/adiletbaimyrza/promptshield/issues
