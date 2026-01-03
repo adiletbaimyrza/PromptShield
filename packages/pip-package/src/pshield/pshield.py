@@ -196,17 +196,39 @@ class PromptShield:
         except:
             lang = "en"
 
+        # Collect all entities from the ORIGINAL text first
+        all_entities = []  # List of (start, end, entity_value, entity_type, mode)
+
         for entity_type, rule in self.rules.items():
+            mode = rule.get('mode', 'placeholder')
             if 'custom' in rule:
-                text = self._replace_custom(text, rule['custom'], entity_type)
+                # NER-based detection
+                found = rule['custom'](text)
+                for entity_value, start, end in found:
+                    all_entities.append((start, end, entity_value, entity_type, mode))
             else:
+                # Regex-based detection
                 for pattern in rule.get('patterns', []):
-                    text = self._replace_pattern(
-                        text,
-                        pattern,
-                        entity_type,
-                        rule.get('mode', 'placeholder')
-                    )
+                    for match in re.finditer(pattern, text):
+                        all_entities.append((match.start(), match.end(), match.group(), entity_type, mode))
+
+        # Remove overlapping entities (keep the first one found for each position)
+        all_entities.sort(key=lambda x: (x[0], -x[1]))  # Sort by start, then by longest
+        non_overlapping = []
+        last_end = -1
+        for start, end, entity_value, entity_type, mode in all_entities:
+            if start >= last_end:
+                non_overlapping.append((start, end, entity_value, entity_type, mode))
+                last_end = end
+
+        # Apply replacements in reverse order to preserve indices
+        non_overlapping.sort(reverse=True, key=lambda x: x[0])
+        for start, end, entity_value, entity_type, mode in non_overlapping:
+            if mode == "normalize":
+                replacement = self._normalize_alnum(entity_value)
+            else:
+                replacement = self._get_placeholder(entity_value, entity_type)
+            text = text[:start] + replacement + text[end:]
 
         if translate and lang != "en":
             text = self._translate_placeholders(text, lang)
