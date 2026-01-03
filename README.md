@@ -105,6 +105,7 @@ Visit `http://localhost:5000`
 - 💻 **[CLI Tool](cli/README.md)** - Command-line interface documentation
 - 🌐 **[Browser Extension](extension/How2Use.md)** - Installation and usage guide
 - 🔧 **[Python Package Setup](packages/pip-package/SETUP.md)** - Development setup and publishing guide
+- 🔧 **[JavaScript Package Setup](packages/npm-package/SETUP.md)** - Development setup and publishing guide
 
 ## Demo
 
