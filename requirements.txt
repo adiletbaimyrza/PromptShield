@@ -14,3 +14,4 @@ langdetect>=1.0.9
 
 # Development tools
 setuptools>=80.0.0
+gunicorn
