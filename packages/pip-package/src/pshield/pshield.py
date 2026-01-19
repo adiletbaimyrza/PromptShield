@@ -69,12 +69,24 @@ class PromptShield:
             },
             'amount': {
                 'patterns': [
-                    r'[\$\€\£\₽\¥]\s?\d+(?:,\d{3})*(?:\.\d{2})?',
-                    r'\d+(?:,\d{3})*(?:\.\d{2})?\s?(?:USD|EUR|GBP|JPY|AUD|CAD|RUB|CNY|dollars?)',
-                    r'(?:USD|EUR|GBP|JPY|AUD|CAD|RUB|CNY)\s?\d+'
+                    r'[\$\€\£\₽\¥]\s?\d+(?:,\d{3})*(?:\.\d{1,2})?',
+                    r'\d+(?:,\d{3})*(?:\.\d{1,2})?\s*(?:USD|EUR|GBP|JPY|AUD|CAD|RUB|CNY|dollars?)',
+                    r'(?:USD|EUR|GBP|JPY|AUD|CAD|RUB|CNY)\s+\d+(?:,\d{3})*(?:\.\d{1,2})?',
                 ]
             },
            
+            'name': {
+                'custom': lambda text: {
+                    (ent.text, ent.start_char, ent.end_char)
+                    for ent in self.ner(text).ents
+                    if ent.label_ in ("PERSON", "LOC") and ent.text.lower() not in ['blockchain']
+                },
+                'patterns': [
+                    r'\b[A-Z][a-z]+ [A-Z][a-z]+\b',  # Two capitalized words
+                    r'\b[A-Z][a-z]+ [A-Z][\'\u2019][A-Z][a-z]+\b',  # Names with apostrophe like O'Connell
+                    r'\b[A-Z][\'\u2019][A-Z][a-z]+\b',  # Single names with apostrophe like O'Connell
+                ]
+            },
             'place': {
                 'custom': lambda text: {
                     (ent.text, ent.start_char, ent.end_char)
@@ -82,16 +94,10 @@ class PromptShield:
                     if ent.label_ in ("GPE", "LOC")
                 }
             },
-            'name': {
-                'custom': lambda text: {
-                    (ent.text, ent.start_char, ent.end_char)
-                    for ent in self.ner(text).ents
-                    if ent.label_ == "PERSON"
-                }
-            },
             'jwt': {
                 'patterns': [
-                    r"e[yw][A-Za-z0-9-_]+\.(?:e[yw][A-Za-z0-9-_]+)?\.[A-Za-z0-9-_]{2,}"
+                    r'eyJ[A-Za-z0-9_-]*\.eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+',
+                    r'eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+',
                 ]
             },
             'btc_address': {
@@ -115,10 +121,13 @@ class PromptShield:
                 'patterns': [
                     r'\b(?=[A-Za-z0-9\-]*[A-Za-z])(?=[A-Za-z0-9\-]*\d)[A-Za-z0-9\-]+\b'
                 ],
-                'mode': 'normalize'
+                'mode': 'placeholder'
             },
-            "coors": {
-                "patterns": [r'^-?\d{1,2}\.\d+,\s*-?\d{1,3}\.\d+$']
+            'coord': {
+                'patterns': [
+                    r'-?\d{1,3}\.\d{3,},\s*-?\d{1,3}\.\d{3,}',
+                    r'(?:lat|latitude)[:\s]*-?\d{1,3}\.\d+[,\s]+(?:lon|longitude|lng)[:\s]*-?\d{1,3}\.\d+',
+                ]
             }
         }
 
@@ -206,11 +215,10 @@ class PromptShield:
                 found = rule['custom'](text)
                 for entity_value, start, end in found:
                     all_entities.append((start, end, entity_value, entity_type, mode))
-            else:
-                # Regex-based detection
-                for pattern in rule.get('patterns', []):
-                    for match in re.finditer(pattern, text):
-                        all_entities.append((match.start(), match.end(), match.group(), entity_type, mode))
+            # Regex-based detection (always check patterns if present)
+            for pattern in rule.get('patterns', []):
+                for match in re.finditer(pattern, text):
+                    all_entities.append((match.start(), match.end(), match.group(), entity_type, mode))
 
         # Remove overlapping entities (keep the first one found for each position)
         all_entities.sort(key=lambda x: (x[0], -x[1]))  # Sort by start, then by longest

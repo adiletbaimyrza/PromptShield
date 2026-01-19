@@ -398,7 +398,7 @@ def test_coordinates_replacement(coords, shield):
     text = coords  # Coordinates pattern requires entire line match
     protected = shield.protect(text, translate=False)
     assert coords not in protected
-    assert "[COORS_" in protected
+    assert "[COORD_" in protected
 
 
 # =========================
@@ -431,3 +431,180 @@ def test_repeated_entity_same_placeholder(shield):
     protected = shield.protect(text, translate=False)
     # Count occurrences of EMAIL_1 - should be 2
     assert protected.count("[EMAIL_1]") == 2
+
+
+# =========================
+# Full Sample Input Test
+# =========================
+
+SAMPLE_INPUT = """A separate audit dated 2023-11-07 involved Marcus Hill Lina Petrova Daniel Kwon and Priya Nandakumar in New York and Warsaw where credentials included a JWT token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c user handles @alpha_user @betaTester_01 and u/system-admin_99 plus alphanumeric references ZX-9981-A9 BUILD-2024-77X and NODE7K-55 Memory figures fluctuated between 512MB 2 GB and 32GB and a test charge of EUR 3,500.00 was noted
+
+Blockchain placeholders were logged by Ivan Volkov and Hannah O'Connell in Tallinn including BTC address 1BoatSLRHtKNngkdXEeobR76b53LETtpyT and SegWit bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kygt080 plus an ETH address 0x52908400098527886E0F7030069857D2E4169EE7 no funds were real The machine reported 256 GB memory coordinates 37.7749,-122.4194 and a support email chain to ops.team@crypto-mock.io with phone +44 7700 900123
+
+On 01st and 22nd of subsequent cycles Sara Bloom Noah Richter Yuki Tanaka Omar Aziz and Carla Mendes updated records in London and Tokyo referencing IP 172.16.0.5 URLs http://staging.payments.fake/checkout and www.docs.internal.test amounts £799.00 JPY 120000 and USD 42 plus card 5555-6666-7777-8888 exp 08-2027 CVV 987 The hardware profile listed 4GB 16 GB and 64GB RAM across nodes
+
+Final notes from Lucas Meyer and Aisha Rahman in Toronto included usernames @lucas_m u/aisha-sec_ops emails lucas.meyer@samplecorp.test and aisha.rahman@devnull.example passport-like codes P9X-77A-204 REGION-NA-4432 and session IDs SESS-2024-AB12 The archive timestamp 2024/05/30 closed with a checksum entry and a reminder that all data above is fictional and for parser validation only"""
+
+
+def test_sample_input_jwt_fully_anonymized(shield):
+    """JWT must be fully replaced - no segments visible"""
+    protected = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    # JWT segments that must NOT appear
+    assert "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" not in protected
+    assert "e30" not in protected
+    assert "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" not in protected
+    
+    # JWT placeholder should exist
+    assert "[JWT_" in protected
+
+
+def test_sample_input_coordinates_anonymized(shield):
+    """Coordinates must be fully replaced"""
+    protected = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    assert "37.7749" not in protected
+    assert "-122.4194" not in protected
+    assert "37.7749,-122.4194" not in protected
+    
+    # Coordinate placeholder should exist
+    assert "[COORD_" in protected
+
+
+def test_sample_input_crypto_addresses_anonymized(shield):
+    """All crypto addresses must be fully replaced"""
+    protected = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    # BTC legacy
+    assert "1BoatSLRHtKNngkdXEeobR76b53LETtpyT" not in protected
+    # BTC bech32
+    assert "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kygt080" not in protected
+    # ETH
+    assert "0x52908400098527886E0F7030069857D2E4169EE7" not in protected
+    
+    assert "[BTC_ADDRESS_" in protected
+    assert "[ETH_ADDRESS_" in protected
+
+
+def test_sample_input_amounts_anonymized(shield):
+    """All amounts must be fully replaced including currency symbols"""
+    protected = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    assert "EUR 3,500.00" not in protected
+    assert "3,500.00" not in protected
+    assert "£799.00" not in protected
+    assert "799.00" not in protected
+    assert "JPY 120000" not in protected
+    assert "120000" not in protected
+    assert "USD 42" not in protected
+    
+    assert "[AMOUNT_" in protected
+
+
+def test_sample_input_dates_anonymized(shield):
+    """All dates must be replaced"""
+    protected = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    assert "2023-11-07" not in protected
+    assert "2024/05/30" not in protected
+    assert "01st" not in protected
+    assert "22nd" not in protected
+    
+    assert "[DATE_" in protected
+
+
+def test_sample_input_codes_anonymized(shield):
+    """All alphanumeric codes must be anonymized"""
+    protected = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    codes = ["ZX-9981-A9", "BUILD-2024-77X", "NODE7K-55", 
+             "P9X-77A-204", "REGION-NA-4432", "SESS-2024-AB12"]
+    
+    for code in codes:
+        assert code not in protected
+    
+    assert "[ALNUM_CODE_" in protected
+
+
+def test_sample_input_emails_anonymized(shield):
+    """All emails must be replaced"""
+    protected = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    assert "ops.team@crypto-mock.io" not in protected
+    assert "lucas.meyer@samplecorp.test" not in protected
+    assert "aisha.rahman@devnull.example" not in protected
+    
+    assert "[EMAIL_" in protected
+
+
+def test_sample_input_phones_anonymized(shield):
+    """Phone numbers must be replaced"""
+    protected = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    assert "+44 7700 900123" not in protected
+    assert "[PHONE_" in protected
+
+
+def test_sample_input_cards_anonymized(shield):
+    """Credit cards must be replaced"""
+    protected = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    assert "5555-6666-7777-8888" not in protected
+    assert "[CARD_" in protected
+
+
+def test_sample_input_usernames_anonymized(shield):
+    """Usernames must be replaced"""
+    protected = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    assert "@alpha_user" not in protected
+    assert "@betaTester_01" not in protected
+    assert "u/system-admin_99" not in protected
+    assert "@lucas_m" not in protected
+    assert "u/aisha-sec_ops" not in protected
+    
+    assert "[USERNAME_" in protected
+
+
+def test_sample_input_urls_anonymized(shield):
+    """URLs must be replaced"""
+    protected = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    assert "http://staging.payments.fake/checkout" not in protected
+    assert "www.docs.internal.test" not in protected
+    
+    assert "[URL_" in protected
+
+
+def test_sample_input_ips_anonymized(shield):
+    """IP addresses must be replaced"""
+    protected = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    assert "172.16.0.5" not in protected
+    assert "[IP_" in protected
+
+
+def test_sample_input_memory_anonymized(shield):
+    """Memory sizes must be replaced"""
+    protected = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    assert "512MB" not in protected
+    assert "32GB" not in protected
+    assert "256 GB" not in protected
+    assert "4GB" not in protected
+    assert "16 GB" not in protected
+    assert "64GB" not in protected
+    
+    assert "[MEM_" in protected
+
+
+def test_sample_input_deterministic_numbering(shield):
+    """Same input should produce same placeholders"""
+    protected1 = shield.protect(SAMPLE_INPUT, translate=False)
+    
+    # Create new instance to reset cache
+    shield2 = PromptShield()
+    protected2 = shield2.protect(SAMPLE_INPUT, translate=False)
+    
+    # Both outputs should be identical
+    assert protected1 == protected2
