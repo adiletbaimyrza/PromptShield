@@ -247,3 +247,45 @@ class PromptShield:
             text = self._translate_placeholders(text, lang)
 
         return text
+
+    def get_mapping(self) -> Dict[str, str]:
+        """
+        Returns a mapping of placeholders to their original values.
+        Example: {"[EMAIL_1]": "alice@test.com", "[NAME_1]": "Bob"}
+        """
+        mapping = {}
+        for entity_type, cache in self.placeholders_cache.items():
+            for original, placeholder in cache['placeholders'].items():
+                mapping[placeholder] = original
+        return mapping
+
+    def restore(self, text: str, placeholder: str) -> str:
+        """
+        Restores a specific placeholder in the text to its original value.
+        
+        Args:
+            text: The protected text containing placeholders
+            placeholder: The specific placeholder to restore (e.g., "[EMAIL_1]")
+        
+        Returns:
+            Text with the specified placeholder restored to its original value
+        """
+        mapping = self.get_mapping()
+        if placeholder in mapping:
+            return text.replace(placeholder, mapping[placeholder])
+        return text
+
+    def restore_all(self, text: str) -> str:
+        """
+        Restores all placeholders in the text to their original values.
+        
+        Args:
+            text: The protected text containing placeholders
+        
+        Returns:
+            Text with all placeholders restored to their original values
+        """
+        mapping = self.get_mapping()
+        for placeholder, original in mapping.items():
+            text = text.replace(placeholder, original)
+        return text
