@@ -229,6 +229,11 @@ class PromptShield:
                 non_overlapping.append((start, end, entity_value, entity_type, mode))
                 last_end = end
 
+        # Pre-assign placeholders in forward order (ascending by position)
+        for start, end, entity_value, entity_type, mode in non_overlapping:
+            if mode != "normalize":
+                self._get_placeholder(entity_value, entity_type)
+
         # Apply replacements in reverse order to preserve indices
         non_overlapping.sort(reverse=True, key=lambda x: x[0])
         for start, end, entity_value, entity_type, mode in non_overlapping:
