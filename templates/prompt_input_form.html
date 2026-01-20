@@ -124,6 +124,62 @@
             border: 1px solid #eee;
         }
 
+        .placeholder {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #90caf9;
+            font-weight: 500;
+        }
+
+        .placeholder:hover {
+            background: #bbdefb;
+            border-color: #1976d2;
+            transform: translateY(-1px);
+        }
+
+        .placeholder.restored {
+            background: #c8e6c9;
+            color: #388e3c;
+            border-color: #81c784;
+            cursor: pointer;
+            animation: restoreFlash 0.5s ease;
+        }
+
+        .placeholder.restored:hover {
+            background: #a5d6a7;
+            border-color: #388e3c;
+        }
+
+        @keyframes restoreFlash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .copy-btn {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #555;
+        }
+
+        .copy-btn.copied {
+            background: #4caf50;
+        }
+
         /* Hero Section */
         .hero {
             text-align: center;
@@ -313,8 +369,9 @@
 
                 {% if anonimized_text %}
                 <div class="result-box">
-                    <h3>Protected</h3>
-                    <div class="result-text">{{ anonimized_text }}</div>
+                    <h3>Protected <span style="font-size: 0.8rem; font-weight: normal; color: #999;">(Click to toggle between placeholder and value)</span></h3>
+                    <div class="result-text" id="protected-text">{{ anonimized_text }}</div>
+                    <button type="button" class="copy-btn" onclick="copyToClipboard()">Copy to Clipboard</button>
                 </div>
                 {% endif %}
             </div>
@@ -387,5 +444,76 @@
             <p style="margin-top: 15px; font-size: 0.9rem;">© 2024 PromptShield. MIT License.</p>
         </div>
     </div>
+
+    <script>
+        // Store the mapping data
+        const mapping = {{ mapping|safe }};
+        // Create reverse mapping (original value -> placeholder)
+        const reverseMapping = {};
+        for (const [placeholder, original] of Object.entries(mapping)) {
+            reverseMapping[original] = placeholder;
+        }
+        
+        // Make placeholders clickable
+        function makeClickable() {
+            const protectedText = document.getElementById('protected-text');
+            if (!protectedText) return;
+            
+            let html = protectedText.textContent;
+            
+            // Replace all placeholders with clickable spans
+            const placeholderPattern = /\[([A-Z_\-À-ÿ\s]+)_(\d+)\]/g;
+            html = html.replace(placeholderPattern, function(match) {
+                return `<span class="placeholder" data-placeholder="${match}" data-state="placeholder" onclick="togglePlaceholder(this)">${match}</span>`;
+            });
+            
+            protectedText.innerHTML = html;
+        }
+        
+        // Toggle between placeholder and original value
+        function togglePlaceholder(element) {
+            const placeholder = element.dataset.placeholder;
+            const currentState = element.dataset.state;
+            
+            if (currentState === 'placeholder') {
+                // Restore to original value
+                if (!mapping[placeholder]) return;
+                
+                const originalValue = mapping[placeholder];
+                element.textContent = originalValue;
+                element.classList.add('restored');
+                element.dataset.state = 'restored';
+                element.title = `Click to show ${placeholder}`;
+            } else {
+                // Restore to placeholder
+                element.textContent = placeholder;
+                element.classList.remove('restored');
+                element.dataset.state = 'placeholder';
+                element.title = 'Click to restore original value';
+            }
+        }
+        
+        // Copy to clipboard function
+        function copyToClipboard() {
+            const protectedText = document.getElementById('protected-text');
+            if (!protectedText) return;
+            
+            const text = protectedText.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+        
+        // Run when page loads
+        document.addEventListener('DOMContentLoaded', makeClickable);
+    </script>
 </body>
 </html>
