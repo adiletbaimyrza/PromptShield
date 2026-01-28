@@ -1,0 +1,48 @@
+{
+  "name": "anonimizacja",
+  "displayName": "Anonimizacja tekstu",
+  "description": "Anonimizacja regex-only (bez spaCy)",
+  "version": "1.4.1",
+  "publisher": "local",
+  "main": "./extension.js",
+  "icon": "icon.png",
+
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+
+  "activationEvents": ["*"],
+
+  "contributes": {
+    "commands": [
+      { "command": "anonimizacja.runFile", "title": "Anonimizuj plik" },
+      { "command": "anonimizacja.runSelection", "title": "Anonimizuj zaznaczenie" },
+      { "command": "anonimizacja.reverseSelection", "title": "Cofnij anonimizację zaznaczenia" }
+    ],
+
+    "submenus": [
+      { "id": "anonimizacja.submenu", "label": "Anonimizuj" }
+    ],
+
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "anonimizacja.submenu",
+          "when": "editorTextFocus",
+          "group": "9_cutcopypaste"
+        }
+      ],
+      "anonimizacja.submenu": [
+        { "command": "anonimizacja.runFile" },
+        {
+          "command": "anonimizacja.runSelection",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "anonimizacja.reverseSelection",
+          "when": "editorHasSelection && anonimizacja.hasHistory"
+        }
+      ]
+    }
+  }
+}
