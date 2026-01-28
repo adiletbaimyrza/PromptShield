@@ -809,9 +809,10 @@
 
                 {% if anonimized_text %}
                 <div class="result-box">
-                    <h3>Protected <span style="font-size: 0.8rem; font-weight: normal; color: #999;">(Click to toggle between placeholder and value)</span></h3>
+                    <h3>Protected <span style="font-size: 0.8rem; font-weight: normal; color: #999;">(Click to toggle between placeholder and value, or select text and click "Anonymize Selected Text")</span></h3>
                     <div class="result-text" id="protected-text">{{ anonimized_text }}</div>
                     <button type="button" class="copy-btn" onclick="copyToClipboard()">Copy to Clipboard</button>
+                    <button type="button" class="copy-btn" onclick="anonymizeSelection()">Anonymize Selected Text</button>
                 </div>
                 {% endif %}
             </div>
@@ -981,6 +982,73 @@
                 element.dataset.state = 'placeholder';
                 element.title = 'Click to restore original value';
             }
+        }
+        
+        // Anonymize manually selected text inside the protected output
+        function anonymizeSelection() {
+            const protectedText = document.getElementById('protected-text');
+            if (!protectedText) return;
+
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+
+            const range = selection.getRangeAt(0);
+
+            // Ensure selection is inside the protected text box
+            if (!protectedText.contains(range.commonAncestorContainer)) {
+                return;
+            }
+
+            const selectedText = selection.toString();
+            if (!selectedText || !selectedText.trim()) {
+                return;
+            }
+
+            // Don't allow anonymizing content that already includes placeholders
+            const fragment = range.cloneContents();
+            if (fragment.querySelector && fragment.querySelector('.placeholder')) {
+                return;
+            }
+
+            const cleanText = selectedText.trim();
+
+            // Generate a new manual placeholder like [MANUAL_1], [MANUAL_2], ...
+            let maxManualIndex = 0;
+            for (const key of Object.keys(mapping || {})) {
+                const match = key.match(/^\[MANUAL_(\d+)\]$/);
+                if (match) {
+                    const idx = parseInt(match[1], 10);
+                    if (!isNaN(idx) && idx > maxManualIndex) {
+                        maxManualIndex = idx;
+                    }
+                }
+            }
+
+            const newIndex = maxManualIndex + 1;
+            const newPlaceholder = `[MANUAL_${newIndex}]`;
+
+            // Update mapping objects so toggle works for manual placeholders
+            mapping[newPlaceholder] = cleanText;
+            if (typeof reverseMapping !== 'undefined') {
+                reverseMapping[cleanText] = newPlaceholder;
+            }
+
+            // Create a new placeholder span and replace the selection with it
+            const span = document.createElement('span');
+            span.className = 'placeholder';
+            span.dataset.placeholder = newPlaceholder;
+            span.dataset.state = 'placeholder';
+            span.textContent = newPlaceholder;
+            span.title = 'Click to restore original value';
+            span.onclick = function () {
+                togglePlaceholder(span);
+            };
+
+            range.deleteContents();
+            range.insertNode(span);
+
+            // Clear the selection for a cleaner UX
+            selection.removeAllRanges();
         }
         
         // Copy to clipboard function
