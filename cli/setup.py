@@ -1,13 +1,13 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='pshield-cli',
     version='1.0.0',
-    py_modules=['cli'],
+    py_modules=['pshield_cli'],
     install_requires=['pshield>=0.0.4'],
     entry_points={
         'console_scripts': [
-            'pshield=cli:main',
+            'pshield=pshield_cli:main',
         ],
     },
     author='PromptShield',
