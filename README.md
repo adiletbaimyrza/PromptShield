@@ -90,6 +90,10 @@ Visit `http://localhost:5000`
 
 📖 **[Extension Documentation](extension/How2Use.md)**
 
+### VSCode Extension
+1. Add vscode_extension folder to %USERPROFILE%\.vscode\extensions\
+2. Restart VSCode
+
 ## Supported Entities
 
 **Personal**: Names, emails, phones, usernames  
