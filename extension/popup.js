@@ -19,7 +19,7 @@ document.getElementById('anonymize').addEventListener('click', async () => {
   anonymizeBtn.textContent = 'Processing...';
   
   try {
-    const response = await fetch('http://localhost:5000/anonymize', {
+    const response = await fetch('http://localhost:5050/anonymize', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ document.getElementById('anonymize').addEventListener('click', async () => {
     output.classList.remove('hidden');
     copyBtn.classList.remove('hidden');
   } catch (error) {
-    output.innerHTML = '<span class="error">Error: Make sure the server is running on localhost:5000</span>';
+    output.innerHTML = '<span class="error">Error: Make sure the server is running on localhost:5050</span>';
     output.classList.remove('hidden');
     copyBtn.classList.add('hidden');
   } finally {
@@ -52,7 +52,8 @@ function makeClickable(text) {
   // Replace all placeholders with clickable spans
   const placeholderPattern = /\[([A-Z_\-À-ÿ\s]+)_(\d+)\]/g;
   let html = text.replace(placeholderPattern, function(match) {
-    return `<span class="placeholder" data-placeholder="${match}" data-state="placeholder">${match}</span>`;
+    const original = currentMapping[match] || '';
+    return `<span class="placeholder" data-placeholder="${match}" data-original="${original}" data-state="placeholder" title="Original: ${original}">${match}</span>`;
   });
   
   output.innerHTML = html;

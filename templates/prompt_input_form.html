@@ -373,6 +373,7 @@
             border: 1px solid rgba(99, 102, 241, 0.3);
             font-weight: 600;
             display: inline-block;
+            position: relative;
         }
 
         .placeholder:hover {
@@ -380,6 +381,47 @@
             border-color: var(--primary);
             transform: translateY(-1px) scale(1.02);
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .placeholder::after {
+            content: attr(data-original);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 100;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 500;
+        }
+
+        .placeholder::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--dark);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .placeholder:hover::after,
+        .placeholder:hover::before {
+            opacity: 1;
+            visibility: visible;
         }
 
         .placeholder.restored {
@@ -954,7 +996,8 @@
             // Replace all placeholders with clickable spans
             const placeholderPattern = /\[([A-Z_\-À-ÿ\s]+)_(\d+)\]/g;
             html = html.replace(placeholderPattern, function(match) {
-                return `<span class="placeholder" data-placeholder="${match}" data-state="placeholder" onclick="togglePlaceholder(this)">${match}</span>`;
+                const original = mapping[match] || '';
+                return `<span class="placeholder" data-placeholder="${match}" data-original="${original}" data-state="placeholder" onclick="togglePlaceholder(this)" title="Click to reveal: ${original}">${match}</span>`;
             });
             
             protectedText.innerHTML = html;

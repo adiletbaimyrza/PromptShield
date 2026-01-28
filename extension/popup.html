@@ -69,11 +69,35 @@
       transition: all 0.2s ease;
       border: 1px solid #90caf9;
       font-weight: 500;
+      position: relative;
     }
     .placeholder:hover {
       background: #bbdefb;
       border-color: #1976d2;
       transform: translateY(-1px);
+    }
+    .placeholder::after {
+      content: attr(data-original);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      z-index: 100;
+      margin-bottom: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .placeholder:hover::after {
+      opacity: 1;
+      visibility: visible;
     }
     .placeholder.restored {
       background: #c8e6c9;
@@ -115,11 +139,126 @@
 </head>
 <body>
   <h3>PromptShield</h3>
-  <p class="hint">Click to toggle between placeholder and original value</p>
+  <p class="hint">Hover to see original • Click to toggle</p>
   <textarea id="input" placeholder="Enter text to anonymize..."></textarea>
   <button id="anonymize">Anonymize</button>
   <div id="output" class="hidden"></div>
   <button id="copy" class="copy-btn hidden">Copy to Clipboard</button>
-  <script src="popup.js"></script>
+  
+  <script>
+    // Store the mapping globally
+    let currentMapping = {};
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const anonymizeBtn = document.getElementById('anonymize');
+      const copyBtn = document.getElementById('copy');
+      const inputEl = document.getElementById('input');
+      const outputEl = document.getElementById('output');
+
+      anonymizeBtn.addEventListener('click', async function() {
+        const input = inputEl.value;
+        
+        if (!input.trim()) {
+          outputEl.innerHTML = '<span class="error">Please enter some text</span>';
+          outputEl.classList.remove('hidden');
+          copyBtn.classList.add('hidden');
+          return;
+        }
+        
+        // Disable button during request
+        anonymizeBtn.disabled = true;
+        anonymizeBtn.textContent = 'Processing...';
+        
+        try {
+          const response = await fetch('http://localhost:5050/anonymize', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: input })
+          });
+          
+          if (!response.ok) {
+            throw new Error('Server error: ' + response.status);
+          }
+          
+          const data = await response.json();
+          currentMapping = data.mapping || {};
+          
+          // Make placeholders clickable
+          makeClickable(data.result);
+          
+          outputEl.classList.remove('hidden');
+          copyBtn.classList.remove('hidden');
+        } catch (error) {
+          console.error('Error:', error);
+          outputEl.innerHTML = '<span class="error">Error: Make sure the server is running.<br>Run: python extension_server.py</span>';
+          outputEl.classList.remove('hidden');
+          copyBtn.classList.add('hidden');
+        } finally {
+          anonymizeBtn.disabled = false;
+          anonymizeBtn.textContent = 'Anonymize';
+        }
+      });
+
+      copyBtn.addEventListener('click', function() {
+        const text = outputEl.textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          const originalText = copyBtn.textContent;
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+          setTimeout(function() {
+            copyBtn.textContent = originalText;
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+    });
+
+    // Make placeholders clickable
+    function makeClickable(text) {
+      const output = document.getElementById('output');
+      
+      // Replace all placeholders with clickable spans
+      const placeholderPattern = /\[([A-Z_\-À-ÿ\s]+)_(\d+)\]/g;
+      let html = text.replace(placeholderPattern, function(match) {
+        const original = currentMapping[match] || '';
+        return '<span class="placeholder" data-placeholder="' + match + '" data-original="' + original + '" data-state="placeholder" title="Original: ' + original + '">' + match + '</span>';
+      });
+      
+      output.innerHTML = html;
+      
+      // Add click listeners to all placeholders
+      const placeholders = output.querySelectorAll('.placeholder');
+      placeholders.forEach(function(placeholder) {
+        placeholder.addEventListener('click', function() {
+          togglePlaceholder(this);
+        });
+      });
+    }
+
+    // Toggle between placeholder and original value
+    function togglePlaceholder(element) {
+      const placeholder = element.dataset.placeholder;
+      const currentState = element.dataset.state;
+      
+      if (currentState === 'placeholder') {
+        // Restore to original value
+        if (!currentMapping[placeholder]) return;
+        
+        const originalValue = currentMapping[placeholder];
+        element.textContent = originalValue;
+        element.classList.add('restored');
+        element.dataset.state = 'restored';
+        element.title = 'Click to show ' + placeholder;
+      } else {
+        // Restore to placeholder
+        element.textContent = placeholder;
+        element.classList.remove('restored');
+        element.dataset.state = 'placeholder';
+        element.title = 'Click to restore original value';
+      }
+    }
+  </script>
 </body>
 </html>

@@ -1,10 +1,13 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "PromptShield Anonymizer",
-  "version": "1.0",
-  "description": "Anonymize your prompts",
-  "browser_action": {
+  "version": "1.1",
+  "description": "Anonymize your prompts - protect sensitive data before sharing",
+  "action": {
     "default_popup": "popup.html"
   },
-  "permissions": []
+  "permissions": [],
+  "host_permissions": [
+    "http://localhost:5050/*"
+  ]
 }
